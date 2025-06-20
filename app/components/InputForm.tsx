@@ -6,7 +6,8 @@ import Image from "next/image";
 
 interface FormData {
   time: number | "";
-  budget: number | "";
+  budgetMin: number | "";
+  budgetMax: number | "";
   calorie: number | "";
   note: string;
   ingredients: { name: string }[];
@@ -37,7 +38,8 @@ export default function InputForm() {
   } = useForm<FormData>({
     defaultValues: {
       time: "",
-      budget: "",
+      budgetMin: "",
+      budgetMax: "",
       calorie: "",
       note: "",
       ingredients: [{ name: "" }],
@@ -57,7 +59,7 @@ export default function InputForm() {
     try {
       const preparedData: PreparedData = {
         time: data.time === "" ? "指定なし" : data.time,
-        budget: data.budget === "" ? "指定なし" : data.budget,
+        budget: (data.budgetMin === "" && data.budgetMax === "") ? "指定なし" : `${data.budgetMin || 0}円以上${data.budgetMax || "∞"}円以下`,
         calorie: data.calorie === "" ? "指定なし" : data.calorie,
         note: data.note.trim() === "" ? "指定なし" : data.note.trim(),
         ingredients: data.ingredients
@@ -142,15 +144,30 @@ export default function InputForm() {
         {/* 💴 予算 */}
         <div>
           <label className="block mb-1 text-sm font-medium">予算（円）</label>
-          <input
-            type="number"
-            {...register("budget", {
-              min: { value: 0, message: "0以上の数字を入力してください" },
-            })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          {errors.budget && (
-            <p className="text-red-500 text-xs mt-1">{errors.budget.message}</p>
+          <div className="flex gap-2 items-center">
+            <input
+              type="number" step="100"
+              {...register("budgetMin", {
+                min: { value: 0, message: "0以上の数字を入力してください" },
+              })}
+              placeholder="最低金額"
+              className="w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="text-sm">円以上</span>
+            <input
+              type="number" step="100"
+              {...register("budgetMax", {
+                min: { value: 0, message: "0以上の数字を入力してください" },
+              })}
+              placeholder="最高金額"
+              className="w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="text-sm">円以下</span>
+          </div>
+          {(errors.budgetMin || errors.budgetMax) && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.budgetMin?.message || errors.budgetMax?.message}
+            </p>
           )}
         </div>
 
@@ -158,7 +175,7 @@ export default function InputForm() {
         <div>
           <label className="block mb-1 text-sm font-medium">時間（分）</label>
           <input
-            type="number"
+            type="number" step="100"
             {...register("time", {
               min: { value: 0, message: "0以上の数字を入力してください" },
             })}
@@ -173,7 +190,7 @@ export default function InputForm() {
         <div>
           <label className="block mb-1 text-sm font-medium">カロリー</label>
           <input
-            type="number"
+            type="number" step="100"
             {...register("calorie", {
               min: { value: 0, message: "0以上の数字を入力してください" },
             })}
