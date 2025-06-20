@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import Image from "next/image";
+// import Image from "next/image";
 
 interface FormData {
   time: number | "";
@@ -12,12 +12,12 @@ interface FormData {
   ingredients: { name: string }[];
 }
 
-interface Recipe {
-  title: string;
-  instructions: string;
-  ingredients: string[];
-  imageUrl: string;
-}
+// interface Recipe {
+//   title: string;
+//   instructions: string;
+//   ingredients: string[];
+//   imageUrl: string;
+// }
 
 type PreparedData = {
   time: number | string;
@@ -49,7 +49,8 @@ export default function InputForm() {
     name: "ingredients",
   });
 
-  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  //const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [recipe, setRecipe] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
@@ -76,7 +77,8 @@ export default function InputForm() {
       }
 
       const result = await res.json();
-      setRecipe(result);
+      //setRecipe(result);
+      setRecipe(result.message);
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(error.message);
@@ -205,31 +207,37 @@ export default function InputForm() {
       </form>
 
       {/* 📝 レシピ結果表示 */}
+      {/*{recipe && (*/}
+      {/*  <div className="bg-white p-6 mt-4 rounded-xl shadow">*/}
+      {/*    <h2 className="text-xl font-bold mb-2">{recipe.title}</h2>*/}
+      {/*    {recipe.imageUrl && (*/}
+      {/*      <div className="relative w-full h-64 mb-3 rounded-md overflow-hidden">*/}
+      {/*        <Image*/}
+      {/*          src={recipe.imageUrl}*/}
+      {/*          alt={recipe.title}*/}
+      {/*          fill*/}
+      {/*          style={{ objectFit: "cover" }}*/}
+      {/*          sizes="(max-width: 768px) 100vw, 50vw"*/}
+      {/*          priority={true}*/}
+      {/*        />*/}
+      {/*      </div>*/}
+      {/*    )}*/}
+      {/*    <p className="mb-2">*/}
+      {/*      <strong>作り方：</strong>*/}
+      {/*      {recipe.instructions}*/}
+      {/*    </p>*/}
+      {/*    <p>*/}
+      {/*      <strong>材料：</strong>*/}
+      {/*      {recipe.ingredients.join(", ")}*/}
+      {/*    </p>*/}
+      {/*  </div>*/}
+      {/*)}*/}
       {recipe && (
-        <div className="bg-white p-6 mt-4 rounded-xl shadow">
-          <h2 className="text-xl font-bold mb-2">{recipe.title}</h2>
-          {recipe.imageUrl && (
-            <div className="relative w-full h-64 mb-3 rounded-md overflow-hidden">
-              <Image
-                src={recipe.imageUrl}
-                alt={recipe.title}
-                fill
-                style={{ objectFit: "cover" }}
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority={true}
-              />
-            </div>
-          )}
-          <p className="mb-2">
-            <strong>作り方：</strong>
-            {recipe.instructions}
-          </p>
-          <p>
-            <strong>材料：</strong>
-            {recipe.ingredients.join(", ")}
-          </p>
-        </div>
+          <div className="bg-white p-6 mt-4 rounded-xl shadow whitespace-pre-wrap">
+            {recipe}
+          </div>
       )}
+
     </div>
   );
 }
