@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
+import Image from "next/image";
 
 interface FormData {
   time: number | "";
@@ -76,8 +77,12 @@ export default function InputForm() {
 
       const result = await res.json();
       setRecipe(result);
-    } catch (error: any) {
-      alert(error.message || "通信エラーが発生しました");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("通信エラーが発生しました");
+      }
     }
     setLoading(false);
   };
@@ -89,7 +94,11 @@ export default function InputForm() {
   const ingredientList = watch("ingredients");
 
   const isDisabled =
-    !time && !budget && !calorie && !note && ingredientList.every((i) => i.name.trim() === "");
+    !time &&
+    !budget &&
+    !calorie &&
+    !note &&
+    ingredientList.every((i) => i.name.trim() === "");
 
   return (
     <div className="space-y-6">
@@ -200,11 +209,16 @@ export default function InputForm() {
         <div className="bg-white p-6 mt-4 rounded-xl shadow">
           <h2 className="text-xl font-bold mb-2">{recipe.title}</h2>
           {recipe.imageUrl && (
-            <img
-              src={recipe.imageUrl}
-              alt={recipe.title}
-              className="w-full h-auto mb-3 rounded-md"
-            />
+            <div className="relative w-full h-64 mb-3 rounded-md overflow-hidden">
+              <Image
+                src={recipe.imageUrl}
+                alt={recipe.title}
+                fill
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={true}
+              />
+            </div>
           )}
           <p className="mb-2">
             <strong>作り方：</strong>
