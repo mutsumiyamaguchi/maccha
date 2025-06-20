@@ -6,7 +6,8 @@ import { useForm, useFieldArray } from "react-hook-form";
 
 interface FormData {
   time: number | "";
-  budget: number | "";
+  budgetMin: number | "";
+  budgetMax: number | "";
   calorie: number | "";
   note: string;
   ingredients: { name: string }[];
@@ -34,10 +35,13 @@ export default function InputForm() {
     watch,
     control,
     formState: { errors },
+    trigger,
   } = useForm<FormData>({
+    mode: "onChange",
     defaultValues: {
       time: "",
-      budget: "",
+      budgetMin: "",
+      budgetMax: "",
       calorie: "",
       note: "",
       ingredients: [{ name: "" }],
@@ -58,7 +62,7 @@ export default function InputForm() {
     try {
       const preparedData: PreparedData = {
         time: data.time === "" ? "指定なし" : data.time,
-        budget: data.budget === "" ? "指定なし" : data.budget,
+        budget: (data.budgetMin === "" && data.budgetMax === "") ? "指定なし" : `${data.budgetMin || 0}円以上${data.budgetMax || "∞"}円以下`,
         calorie: data.calorie === "" ? "指定なし" : data.calorie,
         note: data.note.trim() === "" ? "指定なし" : data.note.trim(),
         ingredients: data.ingredients
@@ -90,14 +94,16 @@ export default function InputForm() {
   };
 
   const time = watch("time");
-  const budget = watch("budget");
+  const budgetMin = watch("budgetMin");
+  const budgetMax = watch("budgetMax");
   const calorie = watch("calorie");
   const note = watch("note");
   const ingredientList = watch("ingredients");
 
   const isDisabled =
     !time &&
-    !budget &&
+    !budgetMin &&
+    !budgetMax &&
     !calorie &&
     !note &&
     ingredientList.every((i) => i.name.trim() === "");
@@ -143,29 +149,57 @@ export default function InputForm() {
 
         {/* 💴 予算 */}
         <div>
-          <label className="block mb-1 text-sm font-medium">予算（円）</label>
-          <input
-            type="number"
-            {...register("budget", {
-              min: { value: 0, message: "0以上の数字を入力してください" },
-            })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          {errors.budget && (
-            <p className="text-red-500 text-xs mt-1">{errors.budget.message}</p>
+          <label className="block mb-1 text-sm font-medium">予算</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="number" step="100"
+              {...register("budgetMin", {
+                min: { value: 0, message: "0以上の数字を入力してください" },
+                validate: (value) => value === "" || watch("budgetMax") === "" || Number(value) <= Number(watch("budgetMax")) || "最低金額は最高金額以下にしてください",
+              })}
+              onChange={(e) => {
+                register("budgetMin").onChange(e);
+                trigger("budgetMax");
+              }}
+              placeholder="最低金額"
+              className="w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="text-sm">円以上</span>
+            <input
+              type="number" step="100"
+              {...register("budgetMax", {
+                min: { value: 0, message: "0以上の数字を入力してください" },
+                validate: (value) => value === "" || watch("budgetMin") === "" || Number(value) >= Number(watch("budgetMin")) || "最高金額は最低金額以上にしてください",
+              })}
+              onChange={(e) => {
+                register("budgetMax").onChange(e);
+                trigger("budgetMin");
+              }}
+              placeholder="最高金額"
+              className="w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="text-sm">円以下</span>
+          </div>
+          {(errors.budgetMin || errors.budgetMax) && (
+            <p className="text-red-500 text-xs mt-1">
+              {errors.budgetMin?.message || errors.budgetMax?.message}
+            </p>
           )}
         </div>
 
         {/* 🕒 時間 */}
         <div>
-          <label className="block mb-1 text-sm font-medium">時間（分）</label>
-          <input
-            type="number"
-            {...register("time", {
-              min: { value: 0, message: "0以上の数字を入力してください" },
-            })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
+          <label className="block mb-1 text-sm font-medium">時間</label>
+          <div className="flex gap-2 items-center">
+            <input
+              type="number" step="5"
+              {...register("time", {
+                min: { value: 0, message: "0以上の数字を入力してください" },
+              })}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="text-sm">分</span>
+          </div>
           {errors.time && (
             <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>
           )}
@@ -174,13 +208,16 @@ export default function InputForm() {
         {/* 🔥 カロリー */}
         <div>
           <label className="block mb-1 text-sm font-medium">カロリー</label>
-          <input
-            type="number"
-            {...register("calorie", {
-              min: { value: 0, message: "0以上の数字を入力してください" },
-            })}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
+          <div className="flex gap-2 items-center">
+            <input
+              type="number" step="100"
+              {...register("calorie", {
+                min: { value: 0, message: "0以上の数字を入力してください" },
+              })}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <span className="text-sm">kcal</span>
+          </div>
           {errors.calorie && (
             <p className="text-red-500 text-xs mt-1">{errors.calorie.message}</p>
           )}
