@@ -83,7 +83,7 @@ export default function InputForm() {
 
       const result = await res.json();
       //setRecipe(result);
-      const obj = JSON.parse(result.message.split('\n').slice(1, -1).join('\n')).recipes
+      const obj = JSON.parse(result.message.split('\n').slice(1, -1).join('\n'))
       setRecipe(obj);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -278,7 +278,7 @@ export default function InputForm() {
           //   }
           // </div>
 
-          <RecipeContainer recipes={recipe} />
+          <RecipeContainer recipes={recipe.recipes} />
       )}
 
     </div>

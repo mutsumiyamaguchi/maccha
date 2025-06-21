@@ -18,6 +18,7 @@ export type RecipeList = {
 }
 
 export const RecipeContainer = ({recipes}: RecipeList )=> {
+    console.log(recipes)
     return (
         <div>
             <h1 style={{ fontSize: "2em" }}>献立</h1>
