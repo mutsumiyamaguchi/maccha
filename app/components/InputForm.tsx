@@ -7,8 +7,7 @@ import { RecipeContainer, RecipeList } from './recipe'
 
 interface FormData {
   time: number | "";
-  budgetMin: number | "";
-  budgetMax: number | "";
+  budget: number | "";
   calorie: number | "";
   note: string;
   ingredients: { name: string }[];
@@ -22,11 +21,14 @@ interface FormData {
 // }
 
 type PreparedData = {
-  time: number | string;
-  budget: number | string;
-  calorie: number | string;
+  // time: number | string;
+  // budget: number | string;
+  // calorie: number | string;
   note: string;
   ingredients: string[];
+  healthiness?: "lowCalorie" | "highProtein" | "hearty" | "指定なし";
+  time?: "fast" | "medium" | "slow" | "指定なし";
+  genre?: "plain" | "rich" | "exotic" | "指定なし";
 };
 
 export default function InputForm() {
@@ -35,14 +37,11 @@ export default function InputForm() {
     handleSubmit,
     watch,
     control,
-    formState: { errors },
-    trigger,
   } = useForm<FormData>({
     mode: "onChange",
     defaultValues: {
       time: "",
-      budgetMin: "",
-      budgetMax: "",
+      budget: "",
       calorie: "",
       note: "",
       ingredients: [{ name: "" }],
@@ -54,21 +53,26 @@ export default function InputForm() {
     name: "ingredients",
   });
 
-  //const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [recipe, setRecipe] = useState<RecipeList | null>(null);
+  const [healthiness, setHealthiness] = useState<"lowCalorie" | "highProtein" | "hearty" | null>(null);
+  const [time, setTime] = useState<"fast" | "medium" | "slow" | null>(null);
+  const [genre, setGenre] = useState<"plain" | "rich" | "exotic" | null>(null);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
     setLoading(true);
     try {
       const preparedData: PreparedData = {
-        time: data.time === "" ? "指定なし" : data.time,
-        budget: (data.budgetMin === "" && data.budgetMax === "") ? "指定なし" : `${data.budgetMin || 0}円以上${data.budgetMax || "∞"}円以下`,
-        calorie: data.calorie === "" ? "指定なし" : data.calorie,
+        // time: data.time === "" ? "指定なし" : data.time,
+        // budget: data.budget === "" ? "指定なし" : data.budget,
+        // calorie: data.calorie === "" ? "指定なし" : data.calorie,
         note: data.note.trim() === "" ? "指定なし" : data.note.trim(),
         ingredients: data.ingredients
           .map((item) => item.name.trim())
           .filter((name) => name !== ""),
+        healthiness: healthiness ?? "指定なし",
+        time: time ?? "指定なし",
+        genre: genre ?? "指定なし",
       };
 
       const res = await fetch("/api/gemini", {
@@ -95,20 +99,21 @@ export default function InputForm() {
     setLoading(false);
   };
 
-  const time = watch("time");
-  const budgetMin = watch("budgetMin");
-  const budgetMax = watch("budgetMax");
-  const calorie = watch("calorie");
+  // const time = watch("time");
+  // const budget = watch("budget");
+  // const calorie = watch("calorie");
   const note = watch("note");
   const ingredientList = watch("ingredients");
 
   const isDisabled =
-    !time &&
-    !budgetMin &&
-    !budgetMax &&
-    !calorie &&
+    // !time &&
+    // !budget &&
+    // !calorie &&
     !note &&
-    ingredientList.every((i) => i.name.trim() === "");
+    ingredientList.every((i) => i.name.trim() === "") &&
+    !healthiness &&
+    !time &&
+    !genre;
 
   return (
     <div className="space-y-6">
@@ -118,15 +123,15 @@ export default function InputForm() {
       >
         {/* 🥦 食材 */}
         <div>
-          <label className="block mb-1 text-sm font-medium">食材</label>
+          <label className="block mb-1 font-bold">1. 使いたい食材は？</label>
           <div className="space-y-2">
             {fields.map((field, index) => (
               <div key={field.id} className="flex gap-2 items-center">
                 <input
                   type="text"
                   {...register(`ingredients.${index}.name`)}
-                  placeholder={`食材${index + 1}`}
-                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  placeholder="例：にんじん"
+                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-3 focus:ring-orange-400"
                 />
                 {fields.length > 1 && (
                   <button
@@ -142,7 +147,7 @@ export default function InputForm() {
             <button
               type="button"
               onClick={() => append({ name: "" })}
-              className="text-blue-500 text-sm mt-1 hover:underline"
+              className="bg-orange-300 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-orange-400"
             >
               ＋ 食材を追加
             </button>
@@ -150,47 +155,26 @@ export default function InputForm() {
         </div>
 
         {/* 💴 予算 */}
-        <div>
+        {/* <div>
           <label className="block mb-1 text-sm font-medium">予算</label>
           <div className="flex gap-2 items-center">
             <input
               type="number" step="100"
-              {...register("budgetMin", {
+              {...register("budget", {
                 min: { value: 0, message: "0以上の数字を入力してください" },
-                validate: (value) => value === "" || watch("budgetMax") === "" || Number(value) <= Number(watch("budgetMax")) || "最低金額は最高金額以下にしてください",
               })}
-              onChange={(e) => {
-                register("budgetMin").onChange(e);
-                trigger("budgetMax");
-              }}
-              placeholder="最低金額"
-              className="w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="例：1000"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-3 focus:ring-orange-400"
             />
-            <span className="text-sm">円以上</span>
-            <input
-              type="number" step="100"
-              {...register("budgetMax", {
-                min: { value: 0, message: "0以上の数字を入力してください" },
-                validate: (value) => value === "" || watch("budgetMin") === "" || Number(value) >= Number(watch("budgetMin")) || "最高金額は最低金額以上にしてください",
-              })}
-              onChange={(e) => {
-                register("budgetMax").onChange(e);
-                trigger("budgetMin");
-              }}
-              placeholder="最高金額"
-              className="w-1/2 border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
-            <span className="text-sm">円以下</span>
+            <span className="text-sm">円</span>
           </div>
-          {(errors.budgetMin || errors.budgetMax) && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.budgetMin?.message || errors.budgetMax?.message}
-            </p>
+          {errors.budget && (
+            <p className="text-red-500 text-xs mt-1">{errors.budget.message}</p>
           )}
-        </div>
+        </div> */}
 
         {/* 🕒 時間 */}
-        <div>
+        {/* <div>
           <label className="block mb-1 text-sm font-medium">時間</label>
           <div className="flex gap-2 items-center">
             <input
@@ -198,17 +182,18 @@ export default function InputForm() {
               {...register("time", {
                 min: { value: 0, message: "0以上の数字を入力してください" },
               })}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="例：30"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-3 focus:ring-orange-400"
             />
             <span className="text-sm">分</span>
           </div>
           {errors.time && (
             <p className="text-red-500 text-xs mt-1">{errors.time.message}</p>
           )}
-        </div>
+        </div> */}
 
         {/* 🔥 カロリー */}
-        <div>
+        {/* <div>
           <label className="block mb-1 text-sm font-medium">カロリー</label>
           <div className="flex gap-2 items-center">
             <input
@@ -216,22 +201,99 @@ export default function InputForm() {
               {...register("calorie", {
                 min: { value: 0, message: "0以上の数字を入力してください" },
               })}
-              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="例：500"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-3 focus:ring-orange-400"
             />
             <span className="text-sm">kcal</span>
           </div>
           {errors.calorie && (
             <p className="text-red-500 text-xs mt-1">{errors.calorie.message}</p>
           )}
+        </div> */}
+
+        {/* ヘルシーさ */}
+        <div>
+          <label className="block mb-1 font-bold">2. ヘルシーさは？</label>
+          <div className="flex gap-2">
+            {[
+              { type: "lowCalorie", label: "🥗 カロリー控えめ" },
+              { type: "highProtein", label: "💪 高たんぱく" },
+              { type: "hearty", label: "🍛 ガッツリ" },
+            ].map(({ type, label }) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setHealthiness(type as typeof healthiness)}
+                className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-full border px-4 text-sm font-medium 
+                  ${healthiness === type
+                    ? "bg-orange-400 text-white border-orange-400"
+                    : "bg-transparent text-neutral-600 border-neutral-300"}
+                  active:translate-y-[2px] active:shadow-none`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 時間 */}
+        <div>
+          <label className="block mb-1 font-bold">3. 調理時間は？</label>
+          <div className="flex gap-2">
+            {[
+              { type: "fast", label: "⏳ できるだけ早く" },
+              { type: "medium", label: "🍳 そこそこ" },
+              { type: "slow", label: "🕰 じっくり" },
+            ].map(({ type, label }) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setTime(type as typeof time)}
+                className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-full border px-4 text-sm font-medium 
+                  ${time === type
+                    ? "bg-orange-400 text-white border-orange-400"
+                    : "bg-transparent text-neutral-600 border-neutral-300"}
+                  active:translate-y-[2px] active:shadow-none`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ジャンル */}
+        <div>
+          <label className="block mb-1 font-bold">4. 食べたい料理のジャンルは？</label>
+          <div className="flex gap-2">
+            {[
+              { type: "plain", label: "🌿 さっぱり系" },
+              { type: "rich", label: "🍖 こってり系" },
+              { type: "exotic", label: "🌶 異国風" },
+            ].map(({ type, label }) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setGenre(type as typeof genre)}
+                className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-full border px-4 text-sm font-medium 
+                  ${genre === type
+                    ? "bg-orange-400 text-white border-orange-400"
+                    : "bg-transparent text-neutral-600 border-neutral-300"}
+                  active:translate-y-[2px] active:shadow-none`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* ✏ 備考 */}
         <div>
-          <label className="block mb-1 text-sm font-medium">備考</label>
+          <label className="block mb-1 font-bold">備考</label>
           <textarea
             {...register("note")}
+            placeholder="アレルギー情報、好みの味付け、その他のリクエストを入力してください"
             rows={3}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+            className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-3 focus:ring-orange-400 resize-none"
           />
         </div>
 
@@ -239,7 +301,7 @@ export default function InputForm() {
         <button
           type="submit"
           disabled={isDisabled || loading}
-          className="bg-blue-500 text-white px-4 py-2 rounded-md font-semibold disabled:opacity-50 hover:bg-blue-600 transition"
+          className="bg-orange-300 text-white px-4 py-2 rounded-md font-semibold disabled:opacity-50 hover:bg-orange-400 transition"
         >
           {loading ? "提案中..." : "AIに聞く！"}
         </button>
