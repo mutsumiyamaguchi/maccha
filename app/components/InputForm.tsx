@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 // import Image from "next/image";
+import { RecipeContainer, RecipeList } from './recipe'
 
 interface FormData {
   time: number | "";
@@ -54,7 +55,7 @@ export default function InputForm() {
   });
 
   //const [recipe, setRecipe] = useState<Recipe | null>(null);
-  const [recipe, setRecipe] = useState<string | null>(null);
+  const [recipe, setRecipe] = useState<RecipeList | null>(null);
   const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data: FormData) => {
@@ -82,7 +83,8 @@ export default function InputForm() {
 
       const result = await res.json();
       //setRecipe(result);
-      setRecipe(result.message);
+      const obj = JSON.parse(result.message.split('\n').slice(1, -1).join('\n')).recipes
+      setRecipe(obj);
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(error.message);
@@ -270,9 +272,13 @@ export default function InputForm() {
       {/*  </div>*/}
       {/*)}*/}
       {recipe && (
-          <div className="bg-white p-6 mt-4 rounded-xl shadow whitespace-pre-wrap">
-            {recipe}
-          </div>
+          // <div className="bg-white p-6 mt-4 rounded-xl shadow whitespace-pre-wrap">
+          //   {
+          //     recipe.map(r => r.name).join(',')
+          //   }
+          // </div>
+
+          <RecipeContainer recipes={recipe} />
       )}
 
     </div>
