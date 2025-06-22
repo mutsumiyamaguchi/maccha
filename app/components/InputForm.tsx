@@ -163,7 +163,7 @@ export default function InputForm() {
               <button
                 key={type}
                 type="button"
-                onClick={() => setHealthiness(type as typeof healthiness)}
+                onClick={() => setHealthiness((prev) => (prev === type ? null : (type as typeof healthiness)))}
                 className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-full border px-4 text-sm font-medium 
                   ${healthiness === type
                     ? "bg-orange-400 text-white border-orange-400"
@@ -188,7 +188,7 @@ export default function InputForm() {
               <button
                 key={type}
                 type="button"
-                onClick={() => setTime(type as typeof time)}
+                onClick={() => setTime((prev) => (prev === type ? null : (type as typeof time)))}
                 className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-full border px-4 text-sm font-medium 
                   ${time === type
                     ? "bg-orange-400 text-white border-orange-400"
@@ -213,7 +213,7 @@ export default function InputForm() {
               <button
                 key={type}
                 type="button"
-                onClick={() => setGenre(type as typeof genre)}
+                onClick={() => setGenre((prev) => (prev === type ? null : (type as typeof genre)))}
                 className={`group relative inline-flex h-10 items-center justify-center overflow-hidden rounded-full border px-4 text-sm font-medium 
                   ${genre === type
                     ? "bg-orange-400 text-white border-orange-400"

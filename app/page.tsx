@@ -1,9 +1,13 @@
 import InputForm from "./components/InputForm";
+import Image from 'next/image';
 
 export default function Home() {
   return (
     <main>
-      <h1 className="text-2xl font-bold mb-4">レシピ提案アプリ</h1>
+      <div className="mb-6 flex justify-center">
+        <Image src="/ロゴ.svg" alt="ラクレピ！ロゴ" width={200} height={60} />
+      </div>
+      <p className="mb-6 text-center text-gray-600">条件を入力して気分に合ったレシピを生成しましょう</p>
       <InputForm />
     </main>
   );
