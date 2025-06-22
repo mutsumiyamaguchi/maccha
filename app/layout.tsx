@@ -13,7 +13,7 @@ import "./globals.css";
 // });
 
 export const metadata: Metadata = {
-  title: 'レシピ提案アプリ',
+  title: 'ラクレピ！',
   description: '条件に合ったレシピをAIが提案してくれるWebアプリ',
 };
 
@@ -24,7 +24,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body className="min-h-screen bg-gray-100 text-gray-900 font-sans antialiased">
+      <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+      </head>
+      <body className="min-h-screen bg-orange-200 text-gray-900 font-sans antialiased">
         <div className="container mx-auto max-w-2xl p-4">
           {children}
         </div>
