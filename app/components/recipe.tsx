@@ -60,7 +60,7 @@ function RecipeItem({ recipe }: RecipeItemProps) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.STABILITY_API_KEY}`,
+          "Authorization": `Bearer ${process.env.NEXT_PUBLIC_}`,
         },
         body: JSON.stringify({
           recipeName: recipe.name,
