@@ -27,7 +27,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body className="min-h-screen bg-orange-200 text-gray-900 font-sans antialiased">
+      <body className="min-h-screen text-gray-900 font-sans antialiased">
         <div className="container mx-auto max-w-2xl p-4">
           {children}
         </div>
